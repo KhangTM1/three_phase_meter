@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
+from component.active import run_once
 from component.pubData import pub_data
-from component.pubDataManufacturer import pub_data_manufacturer
 
-def connect(ID, pagrams):
+def connect(ID, pagrams, vendor):
     client = mqtt.Client(client_id=ID)
     certPath = f'./search/{ID}.cert'
     keyPath = f'./search/{ID}.key'
@@ -21,7 +21,7 @@ def connect(ID, pagrams):
 
         
         pub_data(client, f'{ID}/report', pagrams)
-        pub_data_manufacturer(client, ID)
+        run_once(client, ID, vendor)
         
     client.tls_set(ca_certs='./search/ca.cert', 
                    certfile=certPath, 

@@ -23,8 +23,8 @@ json_data = {
                 "hardware":""
             },
             "model":{
-                "manufacturer":"Viettel",
-                "vendor":"Viettel",
+                "manufacturer":"",
+                "vendor":"",
                 "model_name":"",
                 "model_id":"",
                 "model_code":"",
@@ -37,17 +37,19 @@ json_data = {
         }
     }
 
-def pub_data_manufacturer(client, ID):
+def pub_data_manufacturer(client, ID, vendor, current_time):
     topic_pub=f'{ID}/info'
     current_data = read_data({'information':'http://192.168.30.9/api/v1/information'}, client)
     
     json_data['data']['version']['firmware'] = current_data['information']['fw']
     json_data['data']['version']['hardware'] = current_data['information']['hw']
+    json_data['data']['model']['manufacturer'] = vendor
+    json_data['data']['model']['vendor'] = vendor
     json_data['data']['model']['model_name'] = current_data['information']['metering_point']
     json_data['data']['model']['model_id'] = current_data['information']['uuid']
     json_data['data']['model']['model_code'] = current_data['information']['name']
     json_data['data']['model']['product_date'] = current_data['information']['production_date']
-    json_data['data']['model']['first_use'] = ""
+    json_data['data']['model']['first_use'] = current_time
     message = json.dumps(json_data)
-    client.publish(topic_pub, message)
+    client.publish(topic_pub, message, qos=1, retain=True)
     print("Information")

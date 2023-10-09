@@ -6,11 +6,10 @@ from component.readData import read_data
 def main():
     ID = 'ndc0odgzmza4_00205005000_18a96fdea37'
     pagrams = {
-        # 'meter': 'https://jsonplaceholder.typicode.com/users'
         'meters': 'http://192.168.30.9/api/v1/meters',
         'measurements': 'http://192.168.30.9/api/v1/measurements'
     }
-    client = mqtt_connection.connect(ID, pagrams)
+    client = mqtt_connection.connect(ID, pagrams, vendor='Viettel')
     client.publish(f'{ID}/heartbeat', 'Online', qos=1, retain=True)
     client.subscribe(f'{ID}/command')
     change_thread = threading.Thread(target=start_checking_for_changes, args=(client, f'{ID}/report', pagrams))
