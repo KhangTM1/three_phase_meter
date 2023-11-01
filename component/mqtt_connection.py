@@ -1,12 +1,17 @@
 import paho.mqtt.client as mqtt
-from component.active import run_once
 from component.pubData import pub_data
+import threading
 
-def connect(ID, pagrams, vendor):
+
+def send_message(client, ID, pagrams, current_dir):
+    pub_data(client, f'{ID}/report', pagrams, current_dir)
+
+
+def connect(ID, pagrams, vendor, current_dir):
     client = mqtt.Client(client_id=ID)
-    certPath = f'./search/{ID}.cert'
-    keyPath = f'./search/{ID}.key'
-
+    certPath = f'{current_dir}/search/{ID}.cert'
+    keyPath = f'{current_dir}/search/{ID}.key'
+    certsPath = f'{current_dir}/search/ca.cert'
     
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -15,15 +20,16 @@ def connect(ID, pagrams, vendor):
             print(f"Connection failed with code {rc}")   
             
     def on_message(client, userdata, message):
+        has_run = False
         data = message.payload.decode()
-        with open("./data/dataSub.txt", "w") as file:
+        with open(f"{current_dir}/data/dataSub.txt", "w") as file:
             file.write(data + "\n")
-
+        if not has_run:
+            send_thread = threading.Thread(target=send_message, args=(client, ID, pagrams,current_dir))
+            send_thread.start()
+            has_run = True
         
-        pub_data(client, f'{ID}/report', pagrams)
-        run_once(client, ID, vendor)
-        
-    client.tls_set(ca_certs='./search/ca.cert', 
+    client.tls_set(ca_certs= certsPath, 
                    certfile=certPath, 
                    keyfile=keyPath)
     client.will_set(topic=f'{ID}/heartbeat', payload="Offline", qos=1, retain=True)

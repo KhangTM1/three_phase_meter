@@ -8,12 +8,12 @@ json_data = {
         "header": {
             "source": {
                 "service_name": "device",
-                "id": "ndc0odgzmza4_00205005000_18a96fdea37"
+                "id": ""
             },
             "destination": "broker",
             "requested_by": {
                 "service_name": "device",
-                "id": "ndc0odgzmza4_00205005000_18a96fdea37"
+                "id": ""
             }
         },
         "data": {
@@ -39,8 +39,9 @@ json_data = {
 
 def pub_data_manufacturer(client, ID, vendor, current_time):
     topic_pub=f'{ID}/info'
+    json_data['header']['source']['id'] = ID
+    json_data['header']['requested_by']['id'] = ID
     current_data = read_data({'information':'http://192.168.30.9/api/v1/information'}, client)
-    
     json_data['data']['version']['firmware'] = current_data['information']['fw']
     json_data['data']['version']['hardware'] = current_data['information']['hw']
     json_data['data']['model']['manufacturer'] = vendor

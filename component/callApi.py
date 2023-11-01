@@ -2,8 +2,9 @@ import requests
 import datetime
 import json
 
+has_error = False
 def call_api(api_url, client):
-    has_error = False
+    global has_error
     json_data = {
         "uid": "",
         "version": "1.0",
@@ -22,7 +23,7 @@ def call_api(api_url, client):
         "data": {}
     }
     try:
-        response = requests.get(api_url, timeout=30)
+        response = requests.get(api_url, timeout=10)
         error_state = has_error
         if has_error:
             has_error = False
@@ -38,12 +39,10 @@ def call_api(api_url, client):
                 
                 message = json.dumps(json_data)
                 client.publish('ndc0odgzmza4_00205005000_18a96fdea37/event', message)
-        
         return response.json()
     except requests.exceptions.RequestException as e:
         if not has_error:
-            has_error = True
-            
+            has_error = True  
             json_data["data"] = {
                 "action": "report_event",
                 "event": {
@@ -54,3 +53,5 @@ def call_api(api_url, client):
             
             message = json.dumps(json_data)
             client.publish('ndc0odgzmza4_00205005000_18a96fdea37/event', message)
+        return None
+    
